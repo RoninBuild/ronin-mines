@@ -100,6 +100,51 @@ p {
   font-size: 0.9rem;
 }
 
+.difficulty-toggle {
+  border: 2px dashed rgba(0, 82, 255, 0.6);
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+
+.difficulty-toggle button {
+  padding: 8px 12px;
+  border: 2px solid var(--base-blue);
+  background: transparent;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.difficulty-toggle button.active {
+  background: rgba(0, 82, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.35);
+}
+
+.share-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 2px solid var(--base-blue);
+  background: rgba(0, 82, 255, 0.1);
+  color: var(--text);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.25);
+}
+
 .reset-button {
   align-self: flex-start;
   padding: 8px 14px;

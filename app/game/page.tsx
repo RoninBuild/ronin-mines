@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -126,6 +126,7 @@ function formatTime(ms: number) {
 }
 
 export default function GamePage() {
+  const router = useRouter();
   const params = useSearchParams();
   const difficultyParam = (params.get("d") ?? "easy") as Difficulty;
   const difficulty: Difficulty = useMemo(() => {
@@ -295,6 +296,27 @@ export default function GamePage() {
     timeMs
   };
 
+  const handleDifficultyChange = useCallback(
+    (nextDifficulty: Difficulty) => {
+      const nextParams = new URLSearchParams(params.toString());
+      nextParams.set("d", nextDifficulty);
+      router.replace(`/game?${nextParams.toString()}`);
+    },
+    [params, router]
+  );
+
+  const canShare = status === "won" || status === "lost";
+  const shareLabel =
+    status === "won"
+      ? "I survived Ronin Mines!"
+      : `Blew up in ${Math.max(1, Math.floor(timeMs / 1000))}s`;
+  const shareMessage = `${shareLabel} Difficulty: ${difficulty.toUpperCase()} | Time: ${formatTime(
+    timeMs
+  )} | Play: https://roninmines.example/game?d=${difficulty}`;
+  const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+    shareMessage
+  )}`;
+
   return (
     <section className="game-shell">
       <div className="game-header">
@@ -308,6 +330,20 @@ export default function GamePage() {
         <button className="reset-button" type="button" onClick={resetGame}>
           Reset
         </button>
+      </div>
+
+      <div className="difficulty-toggle">
+        <span>DIFFICULTY</span>
+        {(["easy", "medium", "hard"] as Difficulty[]).map((level) => (
+          <button
+            key={level}
+            type="button"
+            className={difficulty === level ? "active" : ""}
+            onClick={() => handleDifficultyChange(level)}
+          >
+            {level}
+          </button>
+        ))}
       </div>
 
       <div className="game-stats">
@@ -324,6 +360,19 @@ export default function GamePage() {
           <strong>{status.toUpperCase()}</strong>
         </div>
       </div>
+
+      {canShare ? (
+        <div className="share-row">
+          <a
+            className="share-button"
+            href={shareUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Share Result
+          </a>
+        </div>
+      ) : null}
 
       <div className="mode-toggle">
         <span>MODE</span>
