@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -306,14 +313,12 @@ export default function GamePage() {
     [params, router]
   );
 
-  const canShare = status === "won" || status === "lost";
-  const shareLabel =
+  const isGameOver = status === "won" || status === "lost";
+  const secondsTaken = Math.max(1, Math.floor(timeMs / 1000));
+  const shareMessage =
     status === "won"
-      ? "I survived Ronin Mines!"
-      : `Blew up in ${Math.max(1, Math.floor(timeMs / 1000))}s`;
-  const shareMessage = `${shareLabel} Difficulty: ${difficulty.toUpperCase()} | Time: ${formatTime(
-    timeMs
-  )} | Play: https://roninmines.example/game?d=${difficulty}`;
+      ? `I cleared Ronin Mines on ${difficulty.toUpperCase()} in ${secondsTaken}s! 💣`
+      : `I blew up in Ronin Mines on ${difficulty.toUpperCase()} after ${secondsTaken}s. 💥`;
   const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
     shareMessage
   )}`;
@@ -362,19 +367,6 @@ export default function GamePage() {
             <strong>{status.toUpperCase()}</strong>
           </div>
         </div>
-
-        {canShare ? (
-          <div className="share-row">
-            <a
-              className="share-button"
-              href={shareUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Share Result
-            </a>
-          </div>
-        ) : null}
 
         <div className="mode-toggle">
           <span>MODE</span>
@@ -443,6 +435,32 @@ export default function GamePage() {
             )}
           </div>
         </div>
+
+        {isGameOver ? (
+          <div className="game-over-overlay" role="presentation">
+            <div className="game-over-modal" role="dialog" aria-modal="true">
+              <h2 className={status === "won" ? "game-over-title win" : "game-over-title lose"}>
+                {status === "won" ? "VICTORY!" : "GAME OVER"}
+              </h2>
+              <p className="game-over-stats">
+                {difficulty.toUpperCase()} • {secondsTaken}s
+              </p>
+              <div className="game-over-actions">
+                <a
+                  className="share-button"
+                  href={shareUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Share on Warpcast
+                </a>
+                <button className="secondary-button" type="button" onClick={resetGame}>
+                  Play Again
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="debug">
           <h2>DEBUG (OFFCHAIN STATE)</h2>

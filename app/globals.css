@@ -101,6 +101,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  position: relative;
 }
 
 .game-header {
@@ -140,11 +141,6 @@ p {
   box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.35);
 }
 
-.share-row {
-  display: flex;
-  justify-content: flex-start;
-}
-
 .share-button {
   display: inline-flex;
   align-items: center;
@@ -157,6 +153,19 @@ p {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.25);
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
 }
 
 .reset-button {
@@ -315,6 +324,53 @@ p {
   word-break: break-word;
   color: #b7c0d8;
   margin-top: 8px;
+}
+
+.game-over-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(6, 10, 20, 0.78);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.game-over-modal {
+  width: min(320px, 90%);
+  border: 2px solid var(--base-blue);
+  background: rgba(10, 15, 30, 0.95);
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.game-over-title {
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+}
+
+.game-over-title.win {
+  color: #7dff7a;
+}
+
+.game-over-title.lose {
+  color: #ff6b6b;
+}
+
+.game-over-stats {
+  color: var(--muted);
+}
+
+.game-over-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 @media (min-width: 768px) {
