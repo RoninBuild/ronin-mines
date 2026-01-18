@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -274,17 +274,18 @@ export default function GamePage() {
     }, 450);
   };
 
-  const handlePointerUp = (row: number, col: number) => {
+  const handlePointerUp = () => {
     if (pressTimer.current) {
       clearTimeout(pressTimer.current);
     }
-    if (!longPressTriggered.current) {
-      handleCellAction(row, col);
-    }
   };
 
-  const gridStyle = {
-    gridTemplateColumns: `repeat(${config.cols}, var(--cell-size))`
+  const cellSize = config.cols > 20 ? 10 : config.cols > 12 ? 18 : 26;
+  const cellGap = config.cols > 20 ? 2 : config.cols > 12 ? 3 : 4;
+  const gridStyle: CSSProperties = {
+    gridTemplateColumns: `repeat(${config.cols}, var(--cell-size))`,
+    ["--cell-size" as string]: `${cellSize}px`,
+    ["--cell-gap" as string]: `${cellGap}px`
   };
 
   const minesRemaining = config.mines - flags.size;
@@ -319,125 +320,134 @@ export default function GamePage() {
 
   return (
     <section className="game-shell">
-      <div className="game-header">
-        <div>
-          <h1>RONIN MINES — OFFCHAIN CORE</h1>
-          <p className="game-subtitle">
-            Difficulty: {difficulty.toUpperCase()} ({config.rows}x{config.cols}
-            , {config.mines} mines)
+      <div className="game-frame">
+        <div className="game-header">
+          <div>
+            <h1>RONIN MINES — OFFCHAIN CORE</h1>
+            <p className="game-subtitle">
+              Difficulty: {difficulty.toUpperCase()} ({config.rows}x{config.cols}
+              , {config.mines} mines)
+            </p>
+          </div>
+          <button className="reset-button" type="button" onClick={resetGame}>
+            Reset
+          </button>
+        </div>
+
+        <div className="difficulty-toggle">
+          <span>DIFFICULTY</span>
+          {(["easy", "medium", "hard"] as Difficulty[]).map((level) => (
+            <button
+              key={level}
+              type="button"
+              className={difficulty === level ? "active" : ""}
+              onClick={() => handleDifficultyChange(level)}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+
+        <div className="game-stats">
+          <div className="stat">
+            <span>MINES</span>
+            <strong>{minesRemaining}</strong>
+          </div>
+          <div className="stat">
+            <span>TIME</span>
+            <strong>{formatTime(timeMs)}</strong>
+          </div>
+          <div className="stat">
+            <span>STATUS</span>
+            <strong>{status.toUpperCase()}</strong>
+          </div>
+        </div>
+
+        {canShare ? (
+          <div className="share-row">
+            <a
+              className="share-button"
+              href={shareUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Share Result
+            </a>
+          </div>
+        ) : null}
+
+        <div className="mode-toggle">
+          <span>MODE</span>
+          <button
+            type="button"
+            className={mode === "open" ? "active" : ""}
+            onClick={() => setMode("open")}
+          >
+            Open
+          </button>
+          <button
+            type="button"
+            className={mode === "flag" ? "active" : ""}
+            onClick={() => setMode("flag")}
+          >
+            Flag
+          </button>
+          <p className="mode-hint">
+            Tap/click to open. Long-press to toggle a flag.
           </p>
         </div>
-        <button className="reset-button" type="button" onClick={resetGame}>
-          Reset
-        </button>
-      </div>
 
-      <div className="difficulty-toggle">
-        <span>DIFFICULTY</span>
-        {(["easy", "medium", "hard"] as Difficulty[]).map((level) => (
-          <button
-            key={level}
-            type="button"
-            className={difficulty === level ? "active" : ""}
-            onClick={() => handleDifficultyChange(level)}
-          >
-            {level}
-          </button>
-        ))}
-      </div>
-
-      <div className="game-stats">
-        <div className="stat">
-          <span>MINES</span>
-          <strong>{minesRemaining}</strong>
+        <div className="grid-wrap">
+          <div className="grid" style={gridStyle}>
+            {Array.from({ length: config.rows }).map((_, row) =>
+              Array.from({ length: config.cols }).map((_, col) => {
+                const key = coordKey(row, col);
+                const isOpen = openedCells.has(key);
+                const isFlag = flags.has(key);
+                const cell = board?.[row]?.[col];
+                const isMine = cell?.mine && isOpen;
+                const number = cell?.adjacent ?? 0;
+                const showNumber = isOpen && number > 0 && !isMine;
+                return (
+                  <button
+                    key={key}
+                    className={[
+                      "cell",
+                      isOpen ? "open" : "",
+                      isFlag ? "flag" : "",
+                      isMine ? "mine" : "",
+                      showNumber ? `n${number}` : ""
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    type="button"
+                    onClick={() => {
+                      if (longPressTriggered.current) {
+                        longPressTriggered.current = false;
+                        return;
+                      }
+                      handleCellAction(row, col);
+                    }}
+                    onPointerDown={() => handlePointerDown(row, col)}
+                    onPointerUp={handlePointerUp}
+                    onPointerLeave={handlePointerUp}
+                    disabled={status === "lost" || status === "won"}
+                    aria-label={`cell ${row + 1}-${col + 1}`}
+                  >
+                    {isFlag ? "⚑" : null}
+                    {isMine ? "✹" : null}
+                    {showNumber ? number : null}
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
-        <div className="stat">
-          <span>TIME</span>
-          <strong>{formatTime(timeMs)}</strong>
-        </div>
-        <div className="stat">
-          <span>STATUS</span>
-          <strong>{status.toUpperCase()}</strong>
-        </div>
-      </div>
 
-      {canShare ? (
-        <div className="share-row">
-          <a
-            className="share-button"
-            href={shareUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Share Result
-          </a>
+        <div className="debug">
+          <h2>DEBUG (OFFCHAIN STATE)</h2>
+          <pre>{JSON.stringify(debugData, null, 2)}</pre>
         </div>
-      ) : null}
-
-      <div className="mode-toggle">
-        <span>MODE</span>
-        <button
-          type="button"
-          className={mode === "open" ? "active" : ""}
-          onClick={() => setMode("open")}
-        >
-          Open
-        </button>
-        <button
-          type="button"
-          className={mode === "flag" ? "active" : ""}
-          onClick={() => setMode("flag")}
-        >
-          Flag
-        </button>
-        <p className="mode-hint">
-          Tap/click to open. Long-press to toggle a flag.
-        </p>
-      </div>
-
-      <div className="grid-wrap">
-        <div className="grid" style={gridStyle}>
-          {Array.from({ length: config.rows }).map((_, row) =>
-            Array.from({ length: config.cols }).map((_, col) => {
-              const key = coordKey(row, col);
-              const isOpen = openedCells.has(key);
-              const isFlag = flags.has(key);
-              const cell = board?.[row]?.[col];
-              const isMine = cell?.mine && isOpen;
-              const number = cell?.adjacent ?? 0;
-              const showNumber = isOpen && number > 0 && !isMine;
-              return (
-                <button
-                  key={key}
-                  className={[
-                    "cell",
-                    isOpen ? "open" : "",
-                    isFlag ? "flag" : "",
-                    isMine ? "mine" : "",
-                    showNumber ? `n${number}` : ""
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  type="button"
-                  onPointerDown={() => handlePointerDown(row, col)}
-                  onPointerUp={() => handlePointerUp(row, col)}
-                  onPointerLeave={() => handlePointerUp(row, col)}
-                  disabled={status === "lost" || status === "won"}
-                  aria-label={`cell ${row + 1}-${col + 1}`}
-                >
-                  {isFlag ? "⚑" : null}
-                  {isMine ? "✹" : null}
-                  {showNumber ? number : null}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      <div className="debug">
-        <h2>DEBUG (OFFCHAIN STATE)</h2>
-        <pre>{JSON.stringify(debugData, null, 2)}</pre>
       </div>
     </section>
   );
