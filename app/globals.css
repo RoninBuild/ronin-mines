@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   color-scheme: dark;
   --base-blue: #0052ff;
@@ -81,12 +85,6 @@ p {
   color: var(--base-blue);
   background: rgba(0, 82, 255, 0.12);
   font-size: 0.85rem;
-}
-
-.wallet-center {
-  margin: 24px 0;
-  display: flex;
-  justify-content: center;
 }
 
 .game-shell {
