@@ -1,6 +1,8 @@
+import "@coinbase/onchainkit/styles.css";
 import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "./components/Nav";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "RONIN MINES",
@@ -15,10 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main>
-          <Nav />
-          {children}
-        </main>
+        <Providers>
+          <main>
+            <Nav />
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );

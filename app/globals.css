@@ -83,6 +83,12 @@ p {
   font-size: 0.85rem;
 }
 
+.wallet-center {
+  margin: 24px 0;
+  display: flex;
+  justify-content: center;
+}
+
 .game-shell {
   display: flex;
   flex-direction: column;

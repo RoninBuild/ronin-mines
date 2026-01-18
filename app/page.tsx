@@ -1,3 +1,5 @@
+import { WalletDefault } from "@coinbase/onchainkit/wallet";
+
 export default function HomePage() {
   return (
     <section>
@@ -7,6 +9,9 @@ export default function HomePage() {
         pixel mining adventure. Navigate to explore the coming game systems and
         prep for launch.
       </p>
+      <div className="wallet-center">
+        <WalletDefault />
+      </div>
       <span className="badge">Prototype UI — Onchain systems coming soon</span>
     </section>
   );
